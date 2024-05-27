@@ -30,6 +30,3 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
 ]
-
-[tool.pytest.ini_options]
-pythonpath = ['src']
