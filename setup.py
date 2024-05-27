@@ -1,3 +1,4 @@
+import sys
 import os
 from glob import glob
 
@@ -9,16 +10,16 @@ macro = []
 extra_compile_args = None
 # if os.environ.get("BENCODE_DEBUG") == "1":
 # macro.append(("BENCODE_DEBUG", "1"))
-    # if sys.platform == 'win32':
-    #     extra_compile_args = ['/Z7', '/DEBUG']
+if sys.platform == 'win32':
+    extra_compile_args = ['/utf-8']
 
 module = Pybind11Extension(
     "bencode_cpp._bencode",
     sources=sorted(glob("./src/bencode_cpp/*.cpp")),
-    include_dirs=["./src/bencode_c", "./vendor/klib"],
+    include_dirs=["./src/bencode_cpp", "./vendor/fmt/include"],
     # sources=["src/bencode_cpp/bencode.cpp"],
     define_macros=macro,
-    # extra_compile_args=extra_compile_args,
+    extra_compile_args=extra_compile_args,
     # py_limited_api=True,
 )
 

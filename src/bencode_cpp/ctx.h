@@ -3,6 +3,8 @@
 #include <string>
 #include <unordered_set>
 
+#include <fmt/core.h>
+
 #include "common.h"
 
 #define defaultBufferSize 4096
@@ -42,12 +44,12 @@ public:
     }
 
     void writeSize_t(size_t val) {
-        std::string s = std::format("{}", val);
+        std::string s = fmt::format("{}", val);
         write(s.data(), s.length());
     }
 
     void writeLongLong(long long val) {
-        std::string s = std::format("{}", val);
+        std::string s = fmt::format("{}", val);
         write(s.data(), s.length());
     }
 

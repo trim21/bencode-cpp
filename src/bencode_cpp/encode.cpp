@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include <Python.h>
 #include <algorithm> // std::sort
 #include <pybind11/pybind11.h>
@@ -13,7 +11,7 @@ namespace py = pybind11;
   if (o)                                                                                           \
   return
 
-void encodeAny(Context *ctx, py::handle obj);
+static void encodeAny(Context *ctx, py::handle obj);
 
 bool cmp(std::pair<std::string, py::handle> &a, std::pair<std::string, py::handle> &b) {
     return a.first < b.first;
@@ -161,7 +159,7 @@ static void encodeTuple(Context *ctx, py::handle obj) {
     uintptr_t key = (uintptr_t)obj.ptr();                                                          \
     debug_print("put object %p to seen", key);                                                     \
     debug_print("after put object %p to seen", key);                                               \
-    if (ctx->seen.contains(key)) {                                                                \
+    if (ctx->seen.find(key) != ctx->seen.end()) {                                                                \
       debug_print("circular reference found");                                                     \
       throw py::value_error("circular reference found");                                           \
     }                                                                                              \
@@ -192,7 +190,7 @@ static void encodeAny(Context *ctx, const py::handle obj) {
         char *s;
 
         if (PyBytes_AsStringAndSize(obj.ptr(), &s, &size)) {
-            throw std::exception("failed to get contents of bytes");
+            throw std::runtime_error("failed to get contents of bytes");
         }
 
         debug_print("write buffer");
@@ -238,7 +236,7 @@ static void encodeAny(Context *ctx, const py::handle obj) {
     // Unsupported type, raise TypeError
     std::string repr = py::repr(obj.get_type());
 
-    std::string msg = std::format("failed to encode object {}", repr);
+    std::string msg = "unsupported object " + repr;
 
     throw py::type_error(msg);
 }
