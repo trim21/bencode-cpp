@@ -5,7 +5,7 @@ from glob import glob
 from setuptools import setup, find_packages
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 
-macro = []
+macro = [('FMT_HEADER_ONLY', '')]
 
 extra_compile_args = None
 # if os.environ.get("BENCODE_DEBUG") == "1":
