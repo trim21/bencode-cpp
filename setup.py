@@ -32,6 +32,5 @@ setup(
     package_data={"": ["*.h", "*.cpp", "*.pyi", "py.typed"]},
     include_package_data=True,
     cmdclass={"build_ext": build_ext},
-    options={"bdist_wheel": {"py_limited_api": "cp38"}},
     zip_safe=False,
 )
