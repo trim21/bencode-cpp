@@ -1,0 +1,10 @@
+# build
+pybind11
+setuptools
+wheel
+# lint
+pre-commit
+# testing
+pytest
+pytest-benchmark
+pytest-github-actions-annotate-failures==0.2.0

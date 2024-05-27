@@ -31,18 +31,5 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 
-[project.optional-dependencies]
-dev = [
-    # build
-    "pybind11",
-    # lint
-    "pre-commit",
-    # testing
-    "pytest==8.2.1",
-    "pytest-github-actions-annotate-failures==0.2.0",
-    # build check
-    "abi3audit",
-]
-
 [tool.pytest.ini_options]
 pythonpath = ['src']
