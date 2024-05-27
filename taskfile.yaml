@@ -1,0 +1,68 @@
+version: 3
+tasks:
+  #  build:
+  #    cmds:
+  #      - cmd: python setup.py bdist_wheel
+  bump:
+    vars:
+      VERSION:
+        sh: yq '.project.version' pyproject.toml
+    cmds:
+      - git add pyproject.toml
+      - 'git commit -m "bump: {{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
+
+  c-fmt:
+    cmd: clang-format -i src/bencode_cpp/*.cpp src/bencode_cpp/*.h
+
+  build:
+    sources:
+      - src/**/*.c
+      - src/**/*.h
+    generates:
+      - src/**/*.so
+      - src/**/*.pyd
+    cmds:
+      - cmd: python setup.py build_ext --force --inplace # --debug
+        silent: true
+
+  build:inplace:
+    sources:
+      - src/**/*.c
+      - src/**/*.h
+    generates:
+      - src/**/*.so
+      - src/**/*.pyd
+    cmds:
+      - cmd: python setup.py build_ext --force --inplace # --debug
+        silent: true
+
+  build:dev:
+#    env:
+#      BENCODE_DEBUG: '1'
+    sources:
+      - src/**/*.c
+      - src/**/*.cpp
+      - src/**/*.h
+    generates:
+      - src/**/*.so
+      - src/**/*.pyd
+    cmds:
+      - cmd: python setup.py build_ext --force --inplace # --debug
+        silent: true
+
+  dev:
+    sources:
+      - tests/**/*.py
+      - tests/*.py
+      - "*.py"
+    env:
+      #      CFLAGS: "-O0 -g"
+      PYTHONPATH: src
+      # LD_PRELOAD: libclang_rt.asan.so
+    deps:
+      - build:dev
+    cmds:
+      - python -X faulthandler -c 'import bencode_cpp'
+      - pytest -x -v -s
+      - cmd: python -X faulthandler a.py

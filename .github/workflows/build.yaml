@@ -1,0 +1,40 @@
+name: build wheels
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - '*'
+
+jobs:
+  build:
+    concurrency:
+      group: '${{ github.workflow }}-${{ github.ref }}'
+      cancel-in-progress: true
+    uses: ./.github/workflows/_build_wheels.yaml
+
+  audit:
+    name: Audit
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: pip
+          cache-dependency-path: 'requirements.txt'
+
+      - run: pip install -e '.[dev]'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist
+
+      - run: abi3audit --verbose dist/*.whl

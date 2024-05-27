@@ -1,0 +1,29 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.task/
+.vscode/
+*.iml
+out
+gen
+.idea/
+.venv/
+.pytest_cache/
+__pycache__
+.httpx
+
+*.so
+*.py[cod]
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Added by cargo
+a.py
+/target
+/data/
+cmake-build-debug/
+*.pdb

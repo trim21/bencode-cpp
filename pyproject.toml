@@ -1,0 +1,48 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools", "pybind11"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bencode-cpp"
+version = "0.0.1"
+description = "A fast and correct bencode serialize/deserialize library"
+license = { text = "MIT" }
+requires-python = ">=3.8,<4.0"
+authors = [
+    { name = "trim21", email = "trim21me@gmail.com" },
+]
+readme = 'readme.md'
+keywords = [
+    "bencode",
+    "bittorrent",
+    "bit-torrent",
+    "serialize",
+    "deserialize",
+    'p2p',
+]
+
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: C",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.optional-dependencies]
+dev = [
+    # build
+    "pybind11",
+    # lint
+    "pre-commit",
+    # testing
+    "pytest==8.2.1",
+    "pytest-github-actions-annotate-failures==0.2.0",
+    # build check
+    "abi3audit",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ['src']
