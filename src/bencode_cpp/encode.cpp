@@ -58,7 +58,7 @@ static void encodeDict(Context *ctx, py::handle obj) {
         lastKey = currentKey;
     }
 
-    for (auto pair: m) {
+    for (auto pair : m) {
         ctx->writeSize_t(pair.first.length());
         bufferWriteChar(ctx, ':');
         bufferWrite(ctx, pair.first.data(), pair.first.length());
@@ -88,7 +88,7 @@ static void encodeDictLike(Context *ctx, py::handle h) {
     auto items = obj.attr("items")();
 
     size_t index = 0;
-    for (auto keyValue: items) {
+    for (auto keyValue : items) {
         std::string repr = py::repr(keyValue);
         debug_print("%s", repr.c_str());
         auto key = PyTuple_GetItem(keyValue.ptr(), 0);
@@ -116,7 +116,7 @@ static void encodeDictLike(Context *ctx, py::handle h) {
         lastKey = currentKey;
     }
 
-    for (auto pair: m) {
+    for (auto pair : m) {
         ctx->writeSize_t(pair.first.length());
         bufferWriteChar(ctx, ':');
         bufferWrite(ctx, pair.first.data(), pair.first.length());
@@ -255,7 +255,7 @@ static void encodeAny(Context *ctx, const py::handle obj) {
         debug_print("write char");
         bufferWriteChar(ctx, ':');
         debug_print("write content");
-        bufferWrite(ctx, (const char *) s, size);
+        bufferWrite(ctx, (const char *)s, size);
         return;
     }
 
