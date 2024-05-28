@@ -8,8 +8,8 @@
 namespace py = pybind11;
 
 #define returnIfError(o)                                                                           \
-  if (o)                                                                                           \
-  return
+    if (o)                                                                                         \
+    return
 
 static void encodeAny(Context *ctx, py::handle obj);
 
@@ -29,9 +29,8 @@ static void encodeDict(Context *ctx, py::handle obj) {
     std::vector<std::pair<std::string, py::handle>> m(l);
     auto items = PyDict_Items(obj.ptr());
 
-    // smart pointer for ref cnt.
-    auto ref = py::handle(items).cast<py::object>();
-    ref.dec_ref();
+    // smart pointer to dec_ref when function return
+    auto ref = AutoFree(items);
 
     for (int i = 0; i < l; ++i) {
         auto keyValue = PyList_GetItem(items, i);
@@ -44,6 +43,64 @@ static void encodeDict(Context *ctx, py::handle obj) {
 
         debug_print("set items");
         m.at(i) = std::make_pair(py::handle(key).cast<std::string>(), py::handle(value));
+    }
+
+    std::sort(m.begin(), m.end(), cmp);
+    auto lastKey = m[0].first;
+    debug_print("key '%s'\n", lastKey.data());
+    for (auto i = 1; i < l; i++) {
+        auto currentKey = m[i].first;
+        debug_print("key '%s'\n", currentKey.data());
+        if (currentKey == lastKey) {
+            throw EncodeError("found duplicated keys");
+        }
+
+        lastKey = currentKey;
+    }
+
+    for (auto pair: m) {
+        ctx->writeSize_t(pair.first.length());
+        bufferWriteChar(ctx, ':');
+        bufferWrite(ctx, pair.first.data(), pair.first.length());
+
+        encodeAny(ctx, pair.second);
+    }
+
+    bufferWrite(ctx, "e", 1);
+    return;
+}
+
+// slow path for types.MappingProxyType
+static void encodeDictLike(Context *ctx, py::handle h) {
+    debug_print("encodeDictLike");
+    returnIfError(bufferWrite(ctx, "d", 1));
+    debug_print("get object size");
+    auto l = PyObject_Size(h.ptr());
+    if (l == 0) {
+        bufferWrite(ctx, "e", 1);
+        return;
+    }
+
+    auto obj = h.cast<py::object>();
+
+    std::vector<std::pair<std::string, py::handle>> m(l);
+    debug_print("get items");
+    auto items = obj.attr("items")();
+
+    size_t index = 0;
+    for (auto keyValue: items) {
+        std::string repr = py::repr(keyValue);
+        debug_print("%s", repr.c_str());
+        auto key = PyTuple_GetItem(keyValue.ptr(), 0);
+        auto value = PyTuple_GetItem(keyValue.ptr(), 1);
+
+        if (!(PyUnicode_Check(key) || PyBytes_Check(key))) {
+            throw EncodeError("dict keys must by keys");
+        }
+
+        debug_print("set items");
+        m.at(index) = std::make_pair(py::handle(key).cast<std::string>(), py::handle(value));
+        index++;
     }
 
     std::sort(m.begin(), m.end(), cmp);
@@ -155,19 +212,19 @@ static void encodeTuple(Context *ctx, py::handle obj) {
 }
 
 #define encodeComposeObject(ctx, obj, encoder)                                                     \
-  do {                                                                                             \
-    uintptr_t key = (uintptr_t)obj.ptr();                                                          \
-    debug_print("put object %p to seen", key);                                                     \
-    debug_print("after put object %p to seen", key);                                               \
-    if (ctx->seen.find(key) != ctx->seen.end()) {                                                                \
-      debug_print("circular reference found");                                                     \
-      throw py::value_error("circular reference found");                                           \
-    }                                                                                              \
-    ctx->seen.insert(key);                                                                         \
-    encoder(ctx, obj);                                                                             \
-    ctx->seen.erase(key);                                                                          \
-    return;                                                                                        \
-  } while (0)
+    do {                                                                                           \
+        uintptr_t key = (uintptr_t)obj.ptr();                                                      \
+        debug_print("put object %p to seen", key);                                                 \
+        debug_print("after put object %p to seen", key);                                           \
+        if (ctx->seen.find(key) != ctx->seen.end()) {                                              \
+            debug_print("circular reference found");                                               \
+            throw py::value_error("circular reference found");                                     \
+        }                                                                                          \
+        ctx->seen.insert(key);                                                                     \
+        encoder(ctx, obj);                                                                         \
+        ctx->seen.erase(key);                                                                      \
+        return;                                                                                    \
+    } while (0)
 
 static void encodeAny(Context *ctx, const py::handle obj) {
     debug_print("encodeAny");
@@ -217,7 +274,7 @@ static void encodeAny(Context *ctx, const py::handle obj) {
         return;
     }
 
-    if (py::isinstance<py::int_>(obj)) {
+    if (PyLong_Check(obj.ptr())) {
         return encodeInt(ctx, obj);
     }
 
@@ -231,6 +288,13 @@ static void encodeAny(Context *ctx, const py::handle obj) {
 
     if (PyDict_Check(obj.ptr())) {
         encodeComposeObject(ctx, obj, encodeDict);
+    }
+
+    // types.MappingProxyType
+    debug_print("test if mapping proxy");
+    if (obj.ptr()->ob_type == &PyDictProxy_Type) {
+        debug_print("encode mapping proxy");
+        encodeComposeObject(ctx, obj, encodeDictLike);
     }
 
     // Unsupported type, raise TypeError

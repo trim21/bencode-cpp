@@ -14,27 +14,27 @@
 #ifdef _MSC_VER
 #define debug_print(fmt, ...)                                                                      \
                                                                                                    \
-  do {                                                                                             \
-    printf(__FILE__);                                                                              \
-    printf(":");                                                                                   \
-    printf("%d", __LINE__);                                                                        \
-    printf("\t%s", __FUNCTION__);                                                                  \
-    printf("\tDEBUG: ");                                                                           \
-    printf(fmt, __VA_ARGS__);                                                                      \
-    printf("\n");                                                                                  \
-  } while (0)
+    do {                                                                                           \
+        printf(__FILE__);                                                                          \
+        printf(":");                                                                               \
+        printf("%d", __LINE__);                                                                    \
+        printf("\t%s", __FUNCTION__);                                                              \
+        printf("\tDEBUG: ");                                                                       \
+        printf(fmt, __VA_ARGS__);                                                                  \
+        printf("\n");                                                                              \
+    } while (0)
 
 #else
 
 #define debug_print(fmt, ...)                                                                      \
-  do {                                                                                             \
-    printf(__FILE__);                                                                              \
-    printf(":");                                                                                   \
-    printf("%d", __LINE__);                                                                        \
-    printf("\t%s\tDEBUG: ", __PRETTY_FUNCTION__);                                                  \
-    printf(fmt, ##__VA_ARGS__);                                                                    \
-    printf("\n");                                                                                  \
-  } while (0)
+    do {                                                                                           \
+        printf(__FILE__);                                                                          \
+        printf(":");                                                                               \
+        printf("%d", __LINE__);                                                                    \
+        printf("\t%s\tDEBUG: ", __PRETTY_FUNCTION__);                                              \
+        printf(fmt, ##__VA_ARGS__);                                                                \
+        printf("\n");                                                                              \
+    } while (0)
 
 #endif
 #else
@@ -45,20 +45,29 @@
 
 struct EncodeError : public std::exception {
 public:
-  EncodeError(std::string msg) { s = msg; }
+    EncodeError(std::string msg) { s = msg; }
 
-  const char *what() const throw() { return s.c_str(); }
+    const char *what() const throw() { return s.c_str(); }
 
 private:
-  std::string s;
+    std::string s;
 };
 
 struct DecodeError : public std::exception {
 public:
-  DecodeError(std::string msg) { s = msg; }
+    DecodeError(std::string msg) { s = msg; }
 
-  const char *what() const throw() { return s.c_str(); }
+    const char *what() const throw() { return s.c_str(); }
 
 private:
-  std::string s;
+    std::string s;
+};
+
+class AutoFree {
+public:
+    PyObject *ptr;
+
+    AutoFree(PyObject *p) { ptr = p; }
+
+    ~AutoFree() { Py_DecRef(ptr); }
 };

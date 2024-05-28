@@ -1,7 +1,7 @@
 #include <string>
 
-#include <pybind11/pybind11.h>
 #include <fmt/core.h>
+#include <pybind11/pybind11.h>
 
 #include "common.h"
 #include "overflow.h"
@@ -60,8 +60,8 @@ static py::object decodeInt(const char *buf, Py_ssize_t *index, Py_ssize_t size)
             // val = val * 10 + (buf[i] - '0')
             // but with overflow check
 
-            int of = _u128_mul_overflow(val, 10, &val);
-            of = of || _u128_add_overflow(val, c, &val);
+            int of = _u64_mul_overflow(val, 10, &val);
+            of = of || _u64_add_overflow(val, c, &val);
 
             if (of) {
                 goto __OverFlow;
@@ -80,15 +80,15 @@ static py::object decodeInt(const char *buf, Py_ssize_t *index, Py_ssize_t size)
                 decodeErrF("invalid int, '{:c}' found at {}", c, i);
             }
 
-            of = _i128_mul_overflow(val, 10, &val);
-            of = of || _i128_add_overflow(val, c, &val);
+            of = _i64_mul_overflow(val, 10, &val);
+            of = of || _i64_add_overflow(val, c, &val);
 
             if (of) {
                 goto __OverFlow;
             }
         }
 
-        if (_i128_mul_overflow(val, sign, &val)) {
+        if (_i64_mul_overflow(val, sign, &val)) {
             goto __OverFlow;
         }
 
@@ -96,14 +96,14 @@ static py::object decodeInt(const char *buf, Py_ssize_t *index, Py_ssize_t size)
         return py::cast(val);
     }
 
-    // i1234e
-    // i-1234e
-    //  ^ index
+// i1234e
+// i-1234e
+//  ^ index
 
-    // bencode int overflow u64 or i64, build a PyLong object from Str directly.
-    __OverFlow:;
+// bencode int overflow u64 or i64, build a PyLong object from Str directly.
+__OverFlow:;
     const size_t n = index_e - *index + 1;
-    char *s = (char *) malloc(n);
+    char *s = (char *)malloc(n);
     if (s == NULL) {
         throw std::bad_alloc();
     }
