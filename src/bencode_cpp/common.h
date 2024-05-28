@@ -1,5 +1,7 @@
 #pragma once
 
+#define FMT_HEADER_ONLY
+
 #include <Python.h>
 
 #define HPy_ssize_t Py_ssize_t

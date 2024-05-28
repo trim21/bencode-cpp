@@ -18,6 +18,7 @@ public:
     char *buf;
     size_t index;
     size_t cap;
+
     std::unordered_set<uintptr_t> seen;
 
     Context() {
@@ -35,6 +36,8 @@ public:
         free(buf);
     }
 
+    void write(std::string ss) { write(ss.data(), ss.size()); }
+
     void write(const char *data, HPy_ssize_t size) {
         bufferGrow(size);
 
@@ -43,15 +46,9 @@ public:
         index = index + size;
     }
 
-    void writeSize_t(size_t val) {
-        std::string s = fmt::format("{}", val);
-        write(s.data(), s.length());
-    }
+    void writeSize_t(size_t val) { write(fmt::format("{}", val)); }
 
-    void writeLongLong(long long val) {
-        std::string s = fmt::format("{}", val);
-        write(s.data(), s.length());
-    }
+    void writeLongLong(long long val) { write(fmt::format("{}", val)); }
 
     void writeChar(const char c) {
         bufferGrow(1);
@@ -71,13 +68,3 @@ private:
         }
     }
 };
-
-static int bufferWrite(Context *ctx, const char *data, HPy_ssize_t size) {
-    ctx->write(data, size);
-    return 0;
-}
-
-static int bufferWriteChar(Context *ctx, const char c) {
-    ctx->writeChar(c);
-    return 0;
-}

@@ -19,10 +19,10 @@ bool cmp(std::pair<std::string, py::handle> &a, std::pair<std::string, py::handl
 
 static void encodeDict(Context *ctx, py::handle obj) {
     debug_print("encodeDict");
-    returnIfError(bufferWrite(ctx, "d", 1));
+    ctx->writeChar('d');
     auto l = PyDict_Size(obj.ptr());
     if (l == 0) {
-        bufferWrite(ctx, "e", 1);
+        ctx->writeChar('e');
         return;
     }
 
@@ -60,24 +60,24 @@ static void encodeDict(Context *ctx, py::handle obj) {
 
     for (auto pair : m) {
         ctx->writeSize_t(pair.first.length());
-        bufferWriteChar(ctx, ':');
-        bufferWrite(ctx, pair.first.data(), pair.first.length());
+        ctx->writeChar(':');
+        ctx->write(pair.first.data(), pair.first.length());
 
         encodeAny(ctx, pair.second);
     }
 
-    bufferWrite(ctx, "e", 1);
+    ctx->writeChar('e');
     return;
 }
 
 // slow path for types.MappingProxyType
 static void encodeDictLike(Context *ctx, py::handle h) {
     debug_print("encodeDictLike");
-    returnIfError(bufferWrite(ctx, "d", 1));
+    ctx->writeChar('d');
     debug_print("get object size");
     auto l = PyObject_Size(h.ptr());
     if (l == 0) {
-        bufferWrite(ctx, "e", 1);
+        ctx->writeChar('e');
         return;
     }
 
@@ -118,20 +118,20 @@ static void encodeDictLike(Context *ctx, py::handle h) {
 
     for (auto pair : m) {
         ctx->writeSize_t(pair.first.length());
-        bufferWriteChar(ctx, ':');
-        bufferWrite(ctx, pair.first.data(), pair.first.length());
+        ctx->writeChar(':');
+        ctx->write(pair.first.data(), pair.first.length());
 
         encodeAny(ctx, pair.second);
     }
 
-    bufferWrite(ctx, "e", 1);
+    ctx->writeChar('e');
     return;
 }
 
 static void encodeInt_fast(Context *ctx, long long val) {
-    bufferWrite(ctx, "i", 1);
+    ctx->writeChar('i');
     ctx->writeLongLong(val);
-    bufferWrite(ctx, "e", 1);
+    ctx->writeChar('e');
 }
 
 static void encodeInt_slow(Context *ctx, py::handle obj);
@@ -183,12 +183,12 @@ static void encodeInt_slow(Context *ctx, py::handle obj) {
     Py_DecRef(s);
     Py_DecRef(b);
 
-    bufferWrite(ctx, "e", 1);
+    ctx->writeChar('e');
 }
 
 //
 static void encodeList(Context *ctx, const py::handle obj) {
-    bufferWrite(ctx, "l", 1);
+    ctx->writeChar('l');
 
     HPy_ssize_t len = PyList_Size(obj.ptr());
     for (HPy_ssize_t i = 0; i < len; i++) {
@@ -196,11 +196,11 @@ static void encodeList(Context *ctx, const py::handle obj) {
         encodeAny(ctx, o);
     }
 
-    bufferWrite(ctx, "e", 1);
+    ctx->writeChar('e');
 }
 
 static void encodeTuple(Context *ctx, py::handle obj) {
-    bufferWrite(ctx, "l", 1);
+    ctx->writeChar('l');
 
     HPy_ssize_t len = PyTuple_Size(obj.ptr());
     for (HPy_ssize_t i = 0; i < len; i++) {
@@ -208,7 +208,7 @@ static void encodeTuple(Context *ctx, py::handle obj) {
         encodeAny(ctx, o);
     }
 
-    bufferWrite(ctx, "e", 1);
+    ctx->writeChar('e');
 }
 
 #define encodeComposeObject(ctx, obj, encoder)                                                     \
@@ -231,13 +231,13 @@ static void encodeAny(Context *ctx, const py::handle obj) {
 
     if (obj.ptr() == Py_True) {
         debug_print("encode true");
-        bufferWrite(ctx, "i1e", 3);
+        ctx->write("i1e", 3);
         return;
     }
 
     if (obj.ptr() == Py_False) {
         debug_print("encode false");
-        bufferWrite(ctx, "i0e", 3);
+        ctx->write("i0e", 3);
         return;
     }
 
@@ -253,9 +253,9 @@ static void encodeAny(Context *ctx, const py::handle obj) {
         debug_print("write buffer");
         ctx->writeSize_t(size);
         debug_print("write char");
-        bufferWriteChar(ctx, ':');
+        ctx->writeChar(':');
         debug_print("write content");
-        bufferWrite(ctx, (const char *)s, size);
+        ctx->write((const char *)s, size);
         return;
     }
 
@@ -268,9 +268,9 @@ static void encodeAny(Context *ctx, const py::handle obj) {
         debug_print("write length");
         ctx->writeSize_t(size);
         debug_print("write char");
-        bufferWriteChar(ctx, ':');
+        ctx->writeChar(':');
         debug_print("write content");
-        bufferWrite(ctx, s, size);
+        ctx->write(s, size);
         return;
     }
 
