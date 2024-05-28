@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bencode-cpp"
-version = "0.0.1"
+version = "0.0.1a1"
 description = "A fast and correct bencode serialize/deserialize library"
 license = { text = "MIT" }
 requires-python = ">=3.8,<4.0"
@@ -26,7 +26,13 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: C",
+    "Programming Language :: C++",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
+    "PROGRAMMING LANGUAGE :: PYTHON :: 3.8",
+    "PROGRAMMING LANGUAGE :: PYTHON :: 3.9",
+    "PROGRAMMING LANGUAGE :: PYTHON :: 3.10",
+    "PROGRAMMING LANGUAGE :: PYTHON :: 3.11",
+    "PROGRAMMING LANGUAGE :: PYTHON :: 3.12",
+
 ]
