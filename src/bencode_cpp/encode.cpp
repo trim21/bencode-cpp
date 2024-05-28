@@ -259,7 +259,7 @@ static void encodeAny(Context *ctx, const py::handle obj) {
         return;
     }
 
-    if (py::isinstance<py::str>(obj)) {
+    if (PyUnicode_Check(obj.ptr())) {
         debug_print("encode str");
         HPy_ssize_t size = 0;
 
@@ -288,6 +288,17 @@ static void encodeAny(Context *ctx, const py::handle obj) {
 
     if (PyDict_Check(obj.ptr())) {
         encodeComposeObject(ctx, obj, encodeDict);
+    }
+
+    if (PyByteArray_Check(obj.ptr())) {
+        const char *s = PyByteArray_AsString(obj.ptr());
+        size_t size = PyByteArray_Size(obj.ptr());
+
+        ctx->writeSize_t(size);
+        ctx->writeChar(':');
+        ctx->write(s, size);
+
+        return;
     }
 
     // types.MappingProxyType

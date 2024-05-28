@@ -37,6 +37,13 @@ def test_encode_bytes():
     assert coded == s + b":" + b, "Failed to encode string from bytes."
 
 
+def test_encode_bytearray():
+    b = bytearray([1, 2, 1, 5, 56, 2, 2, 3, 6, 2])
+    coded = bencode(b)
+    s = bytes(str(len(b)), "utf-8")
+    assert coded == s + b":" + bytes(b), "Failed to encode string from bytes."
+
+
 def test_encode_list():
     s = ["a", "b", 3]
     coded = bencode(s)
