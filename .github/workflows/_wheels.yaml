@@ -29,6 +29,7 @@ jobs:
           - {os: windows-latest, arch: x86}
           - {os: windows-latest, arch: AMD64}
           - {os: ubuntu-latest, arch: x86_64}
+          - {os: ubuntu-latest, arch: aarch64}
     steps:
       - uses: docker/setup-qemu-action@v3
         if: matrix.os == 'ubuntu-latest'
