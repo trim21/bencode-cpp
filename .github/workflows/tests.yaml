@@ -52,3 +52,15 @@ jobs:
       - run: pip install -r requirements.txt
 
       - run: pytest -sv
+
+  check_dist:
+    name: Check dist
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist
+
+      - run: pipx run twine check --strict dist/*
