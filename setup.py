@@ -12,17 +12,13 @@ extra_compile_args = None
 # macro.append(("BENCODE_DEBUG", "1"))
 if sys.platform == 'win32':
     extra_compile_args = ['/utf-8']
-elif sys.platform == 'darwin':
-    extra_compile_args = ["-mmacosx-version-min=10.13"]
 
 module = Pybind11Extension(
     "bencode_cpp._bencode",
     sources=sorted(glob("./src/bencode_cpp/*.cpp")),
     include_dirs=["./src/bencode_cpp", "./vendor/fmt/include"],
-    # sources=["src/bencode_cpp/bencode.cpp"],
     define_macros=macro,
     extra_compile_args=extra_compile_args,
-    # py_limited_api=True,
 )
 
 setup(

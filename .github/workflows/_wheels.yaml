@@ -55,6 +55,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_SKIP: 'pp*'
+          MACOSX_DEPLOYMENT_TARGET: '10.13'
 
       - run: ls ./wheelhouse/
 
