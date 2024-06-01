@@ -149,36 +149,32 @@ static void encodeInt(Context *ctx, py::handle obj) {
 
 static void encodeInt_slow(Context *ctx, py::handle obj) {
     HPy fmt = PyUnicode_FromString("%d");
+    if (fmt == NULL) {
+        return;
+    }
+
+    auto _0 = AutoFree(fmt);
+
     HPy s = PyUnicode_Format(fmt, obj.ptr()); // s = '%d" % i
     if (s == NULL) {
-        Py_DecRef(fmt);
         return;
     }
+    auto _1 = AutoFree(s);
 
-    // TODO: use PyUnicode_AsUTF8String in py>=3.10
-    HPy b = PyUnicode_AsUTF8String(s); // b = s.encode()
+    HPy b = PyUnicode_AsUTF8String(s);
     if (b == NULL) {
-        Py_DecRef(fmt);
-        Py_DecRef(s);
         return;
     }
+    auto _2 = AutoFree(b);
 
-    HPy_ssize_t size = PyBytes_Size(b); // len(b)
-    const char *data = PyBytes_AsString(b);
-    if (data == NULL) {
-        Py_DecRef(fmt);
-        Py_DecRef(s);
-        Py_DecRef(b);
+    HPy_ssize_t size;
+    char *data;
+    if (PyBytes_AsStringAndSize(b, &data, &size)) {
         return;
     }
 
     ctx->writeChar('i');
     ctx->write(data, size);
-
-    Py_DecRef(fmt);
-    Py_DecRef(s);
-    Py_DecRef(b);
-
     ctx->writeChar('e');
 }
 
