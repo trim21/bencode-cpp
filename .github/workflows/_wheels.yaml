@@ -52,6 +52,7 @@ jobs:
           CXX: g++-13
 
       - run: |
+          ldd --version
           PLAT=$(python tag.py)
           echo "${PLAT}"
           pipx run auditwheel repair dist/*.whl --plat=${PLAT}
