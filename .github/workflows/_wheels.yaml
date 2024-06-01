@@ -19,7 +19,7 @@ jobs:
           path: dist/*.tar.gz
 
   build_linux_wheels:
-    runs-on: ${{ matrix.os }}
+    runs-on: 'ubuntu-20.04'
     strategy:
       matrix:
         python-version:
