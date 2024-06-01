@@ -1,7 +1,5 @@
 #pragma once
 
-#define FMT_HEADER_ONLY
-
 #include <Python.h>
 
 #define HPy_ssize_t Py_ssize_t
@@ -41,7 +39,9 @@
 #endif
 #else
 
-#define debug_print(fmt, ...)
+#define debug_print(fmt, ...)                                                                      \
+    do {                                                                                           \
+    } while (0)
 
 #endif
 

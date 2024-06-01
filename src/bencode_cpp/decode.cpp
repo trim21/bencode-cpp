@@ -1,3 +1,5 @@
+#define FMT_HEADER_ONLY
+
 #include <string>
 
 #include <fmt/core.h>
@@ -96,11 +98,11 @@ static py::object decodeInt(const char *buf, Py_ssize_t *index, Py_ssize_t size)
         return py::cast(val);
     }
 
-// i1234e
-// i-1234e
-//  ^ index
+    // i1234e
+    // i-1234e
+    //  ^ index
 
-// bencode int overflow u64 or i64, build a PyLong object from Str directly.
+    // bencode int overflow u64 or i64, build a PyLong object from Str directly.
 __OverFlow:;
     const size_t n = index_e - *index + 1;
     char *s = (char *)malloc(n);

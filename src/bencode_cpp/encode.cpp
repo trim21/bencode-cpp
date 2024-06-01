@@ -7,10 +7,6 @@
 
 namespace py = pybind11;
 
-#define returnIfError(o)                                                                           \
-    if (o)                                                                                         \
-    return
-
 static void encodeAny(Context *ctx, py::handle obj);
 
 bool cmp(std::pair<std::string, py::handle> &a, std::pair<std::string, py::handle> &b) {
@@ -52,7 +48,7 @@ static void encodeDict(Context *ctx, py::handle obj) {
         auto currentKey = m[i].first;
         debug_print("key '%s'\n", currentKey.data());
         if (currentKey == lastKey) {
-            throw EncodeError("found duplicated keys");
+            throw EncodeError(fmt::format("found duplicated keys {}", lastKey));
         }
 
         lastKey = currentKey;
@@ -110,7 +106,7 @@ static void encodeDictLike(Context *ctx, py::handle h) {
         auto currentKey = m[i].first;
         debug_print("key '%s'\n", currentKey.data());
         if (currentKey == lastKey) {
-            throw EncodeError("found duplicated keys");
+            throw EncodeError(fmt::format("found duplicated keys {}", lastKey));
         }
 
         lastKey = currentKey;

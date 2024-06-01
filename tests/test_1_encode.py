@@ -170,3 +170,8 @@ def test_recursive_object():
     d["a"] = d
     with pytest.raises(ValueError, match="circular reference found"):
         assert bencode(d)
+
+    d = {}
+    d["a"] = d
+    with pytest.raises(ValueError, match="circular reference found"):
+        assert bencode(d.copy())
