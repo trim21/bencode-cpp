@@ -36,9 +36,9 @@ jobs:
       - name: Setup GCC
         if: matrix.os == 'ubuntu-22.04'
         run: |
-          add-apt-repository ppa:ubuntu-toolchain-r/test
-          apt update -y
-          apt install gcc-13 g++-13 -y
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update -y
+          sudo apt install gcc-13 g++-13 -y
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -46,12 +46,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip" # caching pip dependencies
 
-      - run: pipx build --wheel
+      - run: pipx run build --wheel
         env:
           CC: gcc-13
           CXX: g++-13
 
-      - run: pipx auditwheel repair dist/*.whl --plat=manylinux_$(ldd --version | head -1 | awk '{ print $NF }' | tr '.' '_')_$(uname -m)
+      - run: pipx run auditwheel repair dist/*.whl --plat=manylinux_$(ldd --version | head -1 | awk '{ print $NF }' | tr '.' '_')_$(uname -m)
 
       - run: ls ./wheelhouse/
 
