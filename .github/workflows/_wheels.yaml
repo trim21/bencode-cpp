@@ -33,11 +33,10 @@ jobs:
         with:
           submodules: true
 
-      - name: Set up GCC
-        uses: egor-tensin/setup-gcc@v1
+      - name: Setup GCC
+        uses: Dup4/actions-setup-gcc@v1
         with:
-          version: latest
-          platform: x64
+          version: '13'
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -46,6 +45,9 @@ jobs:
           cache: "pip" # caching pip dependencies
 
       - run: pipx build --wheel
+        env:
+          CC: gcc-13
+          CXX: g++-13
 
       - run: pipx auditwheel repair dist/*.whl --plat=manylinux_$(ldd --version | head -1 | awk '{ print $NF }' | tr '.' '_')_$(uname -m)
 
