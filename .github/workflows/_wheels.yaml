@@ -53,6 +53,7 @@ jobs:
 
       - run: |
           PLAT=$(python tag.py)
+          echo "${PLAT}"
           pipx run auditwheel repair dist/*.whl --plat=${PLAT}
 
       - run: ls ./wheelhouse/
