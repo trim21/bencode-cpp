@@ -52,8 +52,8 @@ jobs:
           CXX: g++-13
 
       - run: |
-          TAG=$(ldd --version | head -1 | awk '{ print $NF }' | tr '.' '_')_$(uname -m)
-          pipx run auditwheel repair dist/*.whl --plat=manylinux_${TAG}
+          PLAT=$(python tag.py)
+          pipx run auditwheel repair dist/*.whl --plat=${PLAT}
 
       - run: ls ./wheelhouse/
 
