@@ -51,7 +51,9 @@ jobs:
           CC: gcc-13
           CXX: g++-13
 
-      - run: pipx run auditwheel repair dist/*.whl --plat=manylinux_$(ldd --version | head -1 | awk '{ print $NF }' | tr '.' '_')_$(uname -m)
+      - run: |
+          TAG=$(ldd --version | head -1 | awk '{ print $NF }' | tr '.' '_')_$(uname -m)
+          pipx run auditwheel repair dist/*.whl --plat=manylinux_${TAG}
 
       - run: ls ./wheelhouse/
 
