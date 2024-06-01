@@ -34,7 +34,7 @@ static void encodeDict(Context *ctx, py::handle obj) {
         auto value = PyTuple_GetItem(keyValue, 1);
 
         if (!(PyUnicode_Check(key) || PyBytes_Check(key))) {
-            throw EncodeError("dict keys must by keys");
+            throw EncodeError("dict keys must be str or bytes");
         }
 
         debug_print("set items");
@@ -91,7 +91,7 @@ static void encodeDictLike(Context *ctx, py::handle h) {
         auto value = PyTuple_GetItem(keyValue.ptr(), 1);
 
         if (!(PyUnicode_Check(key) || PyBytes_Check(key))) {
-            throw EncodeError("dict keys must by keys");
+            throw EncodeError("dict keys must be str or bytes");
         }
 
         debug_print("set items");
