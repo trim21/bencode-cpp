@@ -30,7 +30,7 @@ else:
     if sys.platform == "linux":
         TRIPLET = TRIPLET + "-Linux"
     elif sys.platform == "darwin":
-        TRIPLET = TRIPLET + "-Darwin"
+        TRIPLET = TRIPLET + "-osx"
     else:
         raise AssertionError(f"unknown platform {sys.platform=!r}")
 
