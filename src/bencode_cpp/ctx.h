@@ -1,5 +1,4 @@
 #pragma once
-#define FMT_HEADER_ONLY
 
 #include <string>
 #include <unordered_set>

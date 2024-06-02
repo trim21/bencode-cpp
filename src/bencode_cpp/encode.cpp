@@ -1,6 +1,7 @@
 #include <Python.h>
 #include <algorithm> // std::sort
 #include <pybind11/pybind11.h>
+#include <deque>
 
 #include "common.h"
 #include "ctx.h"
@@ -308,13 +309,50 @@ static void encodeAny(Context *ctx, const py::handle obj) {
     throw py::type_error(msg);
 }
 
+// 100 MiB, who serialize bencode content larger than this normally?
+const size_t drop_buf_larger_than_size = 100 * 1024 * 1024u;
+
+auto release = [](std::shared_ptr<Context> o) {
+    o->seen.clear();
+    if (o->cap > drop_buf_larger_than_size) {
+        free(o->buf);
+        o->buf = static_cast<char *>(malloc(defaultBufferSize));
+        o->cap = defaultBufferSize;
+    }
+    o->index = 0;
+};
+
+// struct lock_policy {
+//     using mutex_type = std::mutex;
+//     using lock_type = std::lock_guard<mutex_type>;
+// };
+
+// NOTE: use a thread lock when free-thread is enabled.
+// without free-thread, encode function will hole GIL so lock is unnecessary.
+
+static std::deque<Context> pool;
+
 py::bytes bencode(py::object v) {
+//    boost::object_pool<Context> pool{32, 0};
+    Context ctx;
+    if (pool.empty()) {
+        ctx = Context();
+    } else {
+        ctx = pool.back();
+        pool.pop_back();
+    }
+
     debug_print("1");
-    auto ctx = Context();
+
+//    auto ctx = Context();
 
     encodeAny(&ctx, v);
 
     auto res = py::bytes(ctx.buf, ctx.index);
+
+    if (pool.size() < 10) {
+        pool.push_back(ctx);
+    }
 
     return res;
 }
