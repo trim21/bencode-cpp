@@ -20,10 +20,12 @@ if sys.platform == "win32":
     else:
         raise AssertionError("only x64 are supported on win32")
 else:
-    if platform.machine() == "aarch64":
+    if platform.machine() in ("aarch64", "arm64"):
         TRIPLET = "arm64"
-    else:
+    elif platform.machine() in ("x86_64", "x64"):
         TRIPLET = "x64"
+    else:
+        raise AssertionError(f"unknown arch {platform.machine()=!r}")
 
     if sys.platform == "linux":
         TRIPLET = TRIPLET + "-Linux"
