@@ -18,8 +18,55 @@ jobs:
           name: 'wheels-dist'
           path: dist/*.tar.gz
 
-  build_wheels:
-    name: Build wheels
+  build_linux_wheels:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - {python-version: "3.8", os: 'ubuntu-22.04'}
+          - {python-version: "3.9", os: 'ubuntu-22.04'}
+          - {python-version: "3.10", os: 'ubuntu-22.04'}
+          - {python-version: "3.11", os: 'ubuntu-22.04'}
+          - {python-version: "3.12", os: 'ubuntu-22.04'}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup GCC
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update -y
+          sudo apt install gcc-13 g++-13 -y
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip" # caching pip dependencies
+
+      - run: pipx run build --wheel
+        env:
+          CC: gcc-13
+          CXX: g++-13
+
+      - run: |
+          pipx run auditwheel show dist/*.whl
+
+          ldd --version
+          PLAT=$(python tag.py)
+          echo "${PLAT}"
+          pipx run auditwheel repair dist/*.whl --plat=${PLAT}
+
+      - run: ls ./wheelhouse/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 'wheels-linux-${{ matrix.python-version }}'
+          path: ./wheelhouse/*.whl
+
+  build_non_linux_wheels:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -28,12 +75,7 @@ jobs:
           - {os: macos-12, arch: arm64}
           - {os: windows-latest, arch: x86}
           - {os: windows-latest, arch: AMD64}
-          - {os: ubuntu-latest, arch: x86_64}
-          - {os: ubuntu-latest, arch: aarch64}
     steps:
-      - uses: docker/setup-qemu-action@v3
-        if: matrix.os == 'ubuntu-latest'
-
       - uses: actions/checkout@v4
         with:
           submodules: true
@@ -66,7 +108,7 @@ jobs:
 
   merge-wheel-artifact:
     runs-on: ubuntu-latest
-    needs: ['build_wheels', 'build']
+    needs: ['build_linux_wheels', 'build_non_linux_wheels', 'build']
     steps:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
