@@ -1,5 +1,3 @@
-#define FMT_HEADER_ONLY
-
 #include <string>
 
 #include <fmt/core.h>

@@ -38,6 +38,8 @@ jobs:
         with:
           submodules: true
 
+      - uses: friendlyanon/setup-vcpkg@v1
+
       - name: Restore cached Primes
         id: cache
         uses: actions/cache@v4

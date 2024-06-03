@@ -21,6 +21,8 @@ dist/
 .eggs/
 *.egg-info/
 
+vcpkg_installed/
+
 # Added by cargo
 a.py
 /target
