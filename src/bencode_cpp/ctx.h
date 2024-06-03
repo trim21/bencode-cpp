@@ -33,8 +33,14 @@ public:
     }
 
     ~Context() {
+        debug_print("delete context");
         seen.clear();
         free(buf);
+    }
+
+    void reset() {
+        index = 0;
+        seen.clear();
     }
 
     void write(std::string ss) { write(ss.data(), ss.size()); }

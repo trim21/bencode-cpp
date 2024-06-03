@@ -9,7 +9,7 @@
 #pragma warning(disable : 4996)
 #endif
 
-#ifdef BENCODE_DEBUG
+#ifdef BENCODE_CPP_DEBUG
 
 #ifdef _MSC_VER
 #define debug_print(fmt, ...)                                                                      \

@@ -308,13 +308,52 @@ static void encodeAny(Context *ctx, const py::handle obj) {
     throw py::type_error(msg);
 }
 
+static std::vector<Context *> pool;
+
+std::unique_ptr<Context> getContext() {
+    if (pool.empty()) {
+        debug_print("empty pool, create Context");
+        return std::make_unique<Context>();
+    }
+
+    debug_print("get Context from pool");
+    auto ctx = pool.back();
+    pool.pop_back();
+
+    return std::unique_ptr<Context>(ctx);
+}
+
+// 30 MiB
+size_t const ctx_buffer_reuse_cap = 30 * 1024 * 1024u;
+
+void releaseContext(std::unique_ptr<Context> ctx) {
+    if (pool.size() < 5 && ctx->cap <= ctx_buffer_reuse_cap) {
+        debug_print("put Context back to pool");
+        ctx.get()->reset();
+        pool.push_back(ctx.get());
+        ctx.release();
+        return;
+    }
+
+    debug_print("delete Context");
+    ctx.reset();
+}
+
+class CtxMgr {
+public:
+    std::unique_ptr<Context> ptr;
+    CtxMgr() { ptr = getContext(); }
+
+    ~CtxMgr() { releaseContext(std::move(ptr)); }
+};
+
 py::bytes bencode(py::object v) {
     debug_print("1");
-    auto ctx = Context();
+    auto ctx = CtxMgr();
 
-    encodeAny(&ctx, v);
+    encodeAny(ctx.ptr.get(), v);
 
-    auto res = py::bytes(ctx.buf, ctx.index);
+    auto res = py::bytes(ctx.ptr->buf, ctx.ptr->index);
 
     return res;
 }

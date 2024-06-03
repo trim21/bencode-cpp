@@ -8,8 +8,8 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 macro = [("FMT_HEADER_ONLY", "")]
 
 extra_compile_args = None
-# if os.environ.get("BENCODE_DEBUG") == "1":
-# macro.append(("BENCODE_DEBUG", "1"))
+# if os.environ.get("BENCODE_CPP_DEBUG") == "1":
+# macro.append(("BENCODE_CPP_DEBUG", "1"))
 if sys.platform == "win32":
     extra_compile_args = ["/utf-8"]
 
