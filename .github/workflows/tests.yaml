@@ -47,7 +47,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip" # caching pip dependencies
 
-      - run: pip install -U pip
+      - run: python -m pip install -U pip
       - run: pip install bencode-cpp --no-index --find-link ./dist/
       - run: pip install -r requirements.txt
 
