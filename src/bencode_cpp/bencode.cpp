@@ -8,7 +8,7 @@ extern py::bytes bencode(py::object v);
 
 extern py::object bdecode(py::object b);
 
-PYBIND11_MODULE(_bencode, m) {
+PYBIND11_MODULE(_bencode, m, py::mod_gil_not_used()) {
     m.def("bdecode", &bdecode, "");
     m.def("bencode", &bencode, "");
     py::register_exception<DecodeError>(m, "BencodeDecodeError");
