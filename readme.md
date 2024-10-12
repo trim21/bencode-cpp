@@ -1,4 +1,6 @@
-# bencode-c
+# see https://github.com/trim21/bencode-py 
+
+# bencode-cpp
 
 bencode serialize/deserialize written with c++, with pybind11.
 
